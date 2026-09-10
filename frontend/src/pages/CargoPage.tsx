@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Check, 
   ArrowRight, 
@@ -72,10 +72,12 @@ const CARGO_TYPES: Record<string, string[]> = {
 };
 
 export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
+  const [cargoTypes, setCargoTypes] = useState<Record<string, string[]>>(CARGO_TYPES);
+
   // Input Form State
   const [form, setForm] = useState<CargoRequirementInput>({
     cargo_category: 'Dry Bulk',
-    cargo_type: 'Coking Coal (Prime Hard Metallurgical)',
+    cargo_type: 'Coal',
     quantity_mt: 165000,
     starting_port: 'Hay Point, AU (HAY)',
     destination_port: 'Paradip, IN (PRT)',
@@ -94,6 +96,19 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
   const [approvalData, setApprovalData] = useState<ApproveDecisionResponse | null>(null);
   const [selectedWhyTab, setSelectedWhyTab] = useState<string>('01');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    cargoService.getCargoOptions()
+      .then((options) => {
+        setCargoTypes(options);
+        const dryBulkTypes = options['Dry Bulk'] ?? [];
+        if (dryBulkTypes.length > 0) {
+          setForm((current) => ({ ...current, cargo_type: dryBulkTypes[0] }));
+          setModifyForm((current) => ({ ...current, cargo_type: dryBulkTypes[0] }));
+        }
+      })
+      .catch(() => setCargoTypes(CARGO_TYPES));
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -170,7 +185,7 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
   const handleReset = () => {
     const defaultForm: CargoRequirementInput = {
       cargo_category: 'Dry Bulk',
-      cargo_type: 'Coking Coal (Prime Hard Metallurgical)',
+      cargo_type: 'Coal',
       quantity_mt: 165000,
       starting_port: 'Hay Point, AU (HAY)',
       destination_port: 'Paradip, IN (PRT)',
@@ -547,7 +562,7 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
                   onClick={() => setForm({
                     ...form,
                     cargo_category: cat,
-                    cargo_type: CARGO_TYPES[cat][0], // reset to first option of new category
+                    cargo_type: (cargoTypes[cat] ?? CARGO_TYPES[cat])[0],
                   })}
                   className={`font-mono text-xs font-semibold py-2.5 px-2 rounded text-center transition-colors ${
                     form.cargo_category === cat
@@ -572,7 +587,7 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
               onChange={(e) => setForm({ ...form, cargo_type: e.target.value })}
               className="w-full bg-[#FAFBFD] border border-[#DFE6EE] rounded px-3 py-2 text-sm font-mono text-[#22272E] focus:outline-none focus:border-[#22272E]"
             >
-              {(CARGO_TYPES[form.cargo_category] ?? []).map((t) => (
+              {(cargoTypes[form.cargo_category] ?? CARGO_TYPES[form.cargo_category] ?? []).map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
@@ -800,15 +815,15 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
               <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-3 rounded">
                 <div className="text-[10px] text-[#6C7A89] uppercase font-bold">RECOMMENDED VESSEL</div>
-                <div className="font-bold text-sm text-[#22272E] mt-1">{analysis.vessel_analysis.recommended_vessel}</div>
+                <div className="font-bold text-sm text-[#22272E] mt-1">{analysis.vessel_analysis.recommended_vessel || 'N/A'}</div>
               </div>
               <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-3 rounded">
                 <div className="text-[10px] text-[#6C7A89] uppercase font-bold">DWT</div>
-                <div className="font-bold text-sm text-[#22272E] mt-1">{analysis.vessel_analysis.dwt.toLocaleString()} MT</div>
+                <div className="font-bold text-sm text-[#22272E] mt-1">{analysis.vessel_analysis.dwt?.toLocaleString() ?? 'N/A'}{analysis.vessel_analysis.dwt ? ' MT' : ''}</div>
               </div>
               <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-3 rounded">
                 <div className="text-[10px] text-[#6C7A89] uppercase font-bold">SUITABILITY</div>
-                <div className="font-bold text-sm text-[#22272E] mt-1">{analysis.vessel_analysis.suitability}%</div>
+                <div className="font-bold text-sm text-[#22272E] mt-1">{analysis.vessel_analysis.suitability != null ? `${analysis.vessel_analysis.suitability}%` : 'N/A'}</div>
               </div>
             </div>
 
@@ -1148,7 +1163,7 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
                       onChange={(e) => setModifyForm({
                         ...modifyForm,
                         cargo_category: e.target.value,
-                        cargo_type: CARGO_TYPES[e.target.value]?.[0] ?? '',
+                        cargo_type: (cargoTypes[e.target.value] ?? CARGO_TYPES[e.target.value] ?? [])[0] ?? '',
                       })}
                       className="w-full bg-[#FAFBFD] border border-[#DFE6EE] rounded px-3 py-2 text-xs font-mono"
                     >
@@ -1165,7 +1180,7 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
                       onChange={(e) => setModifyForm({ ...modifyForm, cargo_type: e.target.value })}
                       className="w-full bg-[#FAFBFD] border border-[#DFE6EE] rounded px-3 py-2 text-xs font-mono"
                     >
-                      {(CARGO_TYPES[modifyForm.cargo_category] ?? []).map((t) => (
+                      {(cargoTypes[modifyForm.cargo_category] ?? CARGO_TYPES[modifyForm.cargo_category] ?? []).map((t) => (
                         <option key={t} value={t}>{t}</option>
                       ))}
                     </select>

@@ -2,6 +2,11 @@ import api from './api';
 import { CargoRequirementInput, CargoAnalysisResponse, ApproveDecisionRequest, ApproveDecisionResponse } from '../types';
 
 export const cargoService = {
+  getCargoOptions: async (): Promise<Record<string, string[]>> => {
+    const res = await api.get<Record<string, string[]>>('/api/vessels/cargo-options');
+    return res.data;
+  },
+
   analyze: async (payload: CargoRequirementInput): Promise<CargoAnalysisResponse> => {
     try {
       const res = await api.post<CargoAnalysisResponse>('/api/cargo/analyze', payload);
@@ -30,15 +35,8 @@ export const cargoService = {
           ]
         },
         vessel_analysis: {
-          recommended_vessel: "MV MARITIME FORTUNE",
-          dwt: 181240,
-          suitability: 96,
-          rightship_score: 5.0,
-          vessels_list: [
-            { name: "MV MARITIME FORTUNE", dwt: 181240, suitability: 96 },
-            { name: "MV OCEAN PIONEER", dwt: 178500, suitability: 84 },
-            { name: "MV PACIFIC BULK", dwt: 180100, suitability: 71 },
-          ]
+          recommended_vessel: "",
+          vessels_list: []
         },
         port_feasibility: {
           loading_port: `LOADING PORT: ${payload.starting_port.split(',')[0].toUpperCase()}`,

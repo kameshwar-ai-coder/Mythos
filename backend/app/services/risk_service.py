@@ -1,8 +1,8 @@
 class RiskService:
     @staticmethod
-    def evaluate_risks(waiting_days: float = 1.8, rightship_score: float = 5.0, market_direction: str = "BULLISH", port_feasible: bool = True):
+    def evaluate_risks(waiting_days: float = 1.8, rightship_score: float = 5.0, market_direction: str = "rise", port_feasible: bool = True):
         # 1. Market Risk (1 - 10)
-        market_score = 3.2 if market_direction == "BULLISH" else (4.5 if market_direction == "STABLE" else 2.1)
+        market_score = 3.2 if market_direction == "rise" else (4.5 if market_direction == "normal" else 2.1)
         market_label = "[MODERATE]" if market_score >= 3.0 else "[LOW]"
 
         # 2. Port Risk (1 - 10)
@@ -10,8 +10,8 @@ class RiskService:
         port_label = "[HIGH]" if port_score >= 6.0 else ("[LOW-MED]" if port_score >= 2.5 else "[LOW]")
 
         # 3. Vessel Risk (1 - 10)
-        vessel_score = round(max(1.0, (5.0 - rightship_score) * 2.0 + 1.1), 1)
-        vessel_label = "[VERY LOW]" if vessel_score < 2.0 else ("[MODERATE]" if vessel_score < 5.0 else "[HIGH]")
+        vessel_score = round(max(1.0, (5.0 - rightship_score) * 2.0 + 1.1), 1) if rightship_score is not None else 5.0
+        vessel_label = "[VERY LOW]" if vessel_score < 2.0 else ("[MODERATE]" if vessel_score < 5.0 else ("[HIGH]" if rightship_score is not None else "[UNKNOWN]"))
 
         # 4. Operational Risk (1 - 10)
         operational_score = 2.0

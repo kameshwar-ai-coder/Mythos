@@ -46,10 +46,16 @@ export interface VesselComparisonItem {
 
 export interface VesselAnalysisData {
   recommended_vessel: string;
-  dwt: number;
-  suitability: number;
-  rightship_score: number;
+  dwt?: number;
+  suitability?: number;
+  rightship_score?: number;
   vessels_list: VesselComparisonItem[];
+  ml_prediction?: {
+    vessel_class: string;
+    confidence: number | null;
+    dataset_source?: string | null;
+    dataset_row?: number | null;
+  } | null;
 }
 
 export interface PortConstraintItem {

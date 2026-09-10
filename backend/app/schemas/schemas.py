@@ -30,16 +30,17 @@ class VesselComparisonItem(BaseModel):
     name: str
     dwt: float
     suitability: int
-    built_year: Optional[int] = 2019
-    vessel_class: Optional[str] = "Capesize"
-    rightship_score: Optional[float] = 5.0
+    built_year: Optional[int] = None
+    vessel_class: Optional[str] = None
+    rightship_score: Optional[float] = None
 
 class VesselAnalysisData(BaseModel):
     recommended_vessel: str
     dwt: float
     suitability: int
-    rightship_score: float
+    rightship_score: Optional[float] = None
     vessels_list: List[VesselComparisonItem]
+    ml_prediction: Optional[Dict[str, Any]] = None
 
 # Port Feasibility Schema
 class PortConstraintItem(BaseModel):

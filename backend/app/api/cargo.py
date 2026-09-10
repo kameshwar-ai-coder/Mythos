@@ -60,6 +60,7 @@ def analyze_cargo(payload: CargoAnalyzeRequest, db: Session = Depends(get_db)):
         db,
         quantity_mt=payload.quantity_mt,
         category=payload.cargo_category,
+        cargo_type=payload.cargo_type,
         destination_port_str=payload.destination_port
     )
 
@@ -105,7 +106,8 @@ def analyze_cargo(payload: CargoAnalyzeRequest, db: Session = Depends(get_db)):
         market_direction=freight_info["direction"],
         overall_risk_score=risk_analysis["overall_score"],
         quantity_mt=payload.quantity_mt,
-        waiting_days=effective_cost["waiting_days"]
+        waiting_days=effective_cost["waiting_days"],
+        ml_prediction=vessel_data.get("ml_prediction")
     )
 
     # Clean formatted cargo summary
@@ -124,6 +126,7 @@ def analyze_cargo(payload: CargoAnalyzeRequest, db: Session = Depends(get_db)):
             "dwt": vessel_data["dwt"],
             "suitability": vessel_data["suitability"],
             "rightship_score": vessel_data["rightship_score"],
+            "ml_prediction": vessel_data.get("ml_prediction"),
             "vessels_list": vessel_data["vessels_list"]
         },
         "port_feasibility": {

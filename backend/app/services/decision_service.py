@@ -9,7 +9,8 @@ class DecisionService:
         market_direction: str,
         overall_risk_score: float,
         quantity_mt: float,
-        waiting_days: float
+        waiting_days: float,
+        ml_prediction: dict | None = None
     ):
         # 1. HARD CONSTRAINT CHECK
         if not port_feasible or vessel_suitability < 40:
@@ -24,19 +25,22 @@ class DecisionService:
             why_strategy = "Recommendation: Reject current fixture nomination and downscale parcel or re-route to deepwater terminal."
         
         # 2. MARKET RISING -> BOOK NOW
-        elif market_direction == "BULLISH":
+        elif market_direction == "rise":
             decision = "BOOK NOW"
             confidence = 92
             strategy = "Spot Single Voyage"
             risk_label = "(LOW)" if overall_risk_score < 3.5 else "(MODERATE)"
             why_market = f"Forward curve indicates upward momentum; prompt booking captures current ${freight_rate:.2f}/MT trough before spot escalation."
-            why_vessel = f"{vessel_name} provides {vessel_suitability}% suitability, 5.0 RightShip rating, and immediate open status in corridor."
+            model_note = ""
+            if ml_prediction:
+                model_note = f" ML model classifies the requirement as {ml_prediction['vessel_class']} with {ml_prediction['confidence']:.1f}% confidence."
+            why_vessel = f"{vessel_name} provides {vessel_suitability}% model suitability and meets the available corridor constraints.{model_note}"
             why_port = "All draft, LOA, and beam constraints validated PASS with mechanized discharge clearance."
             why_cost = f"Total landed cost ${landed_cost:.2f}/MT is protected against forward freight inflation."
             why_strategy = "Single voyage spot execution mitigates medium-term period commitment while locking prompt fixture."
 
         # 3. MARKET FALLING -> WAIT
-        elif market_direction == "BEARISH":
+        elif market_direction == "down":
             decision = "WAIT"
             confidence = 86
             strategy = "Prompt Spot Window Delay"
