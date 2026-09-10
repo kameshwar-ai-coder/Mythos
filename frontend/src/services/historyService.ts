@@ -20,8 +20,14 @@ export const historyService = {
         { voyage_id: "VYG-2025-075", cargo: "Coking Coal", route: "Hay Point → Paradip", vessel: "MV Indian Bulk", quantity: 165000, cost_per_mt: 13.60, status: "COMPLETED", date_str: "30 Jan 2025" },
       ];
 
+      const localVoyages: VoyageLedgerItem[] = JSON.parse(window.localStorage.getItem('mythos.approvedVoyages') || '[]');
+      const ledger = [
+        ...localVoyages,
+        ...defaultLedger.filter((item) => !localVoyages.some((local) => local.voyage_id === item.voyage_id)),
+      ];
+
       return {
-        upcoming_count: 4,
+        upcoming_count: 4 + localVoyages.filter((item) => item.status === 'UPCOMING' && !defaultLedger.some((defaultItem) => defaultItem.voyage_id === item.voyage_id)).length,
         active_count: 6,
         completed_count: 32,
         upcoming_scheduled_mt: 680000,
@@ -38,7 +44,7 @@ export const historyService = {
           { month: "JAN", rate: 14.10 },
           { month: "FEB", rate: 14.42 }
         ],
-        ledger: defaultLedger
+        ledger
       };
     }
   }

@@ -17,7 +17,7 @@ export const cargoService = {
         },
         freight_market: {
           freight_per_mt: 14.85,
-          market_direction: "BULLISH",
+          market_direction: "rise",
           direction_symbol: "▲",
           forecast_per_mt: 16.20,
           trend_history: [
@@ -56,6 +56,7 @@ export const cargoService = {
           waiting: 1.40,
           misc: 0.90,
           total_cost_per_mt: 21.30,
+          total_transport_cost: 3514500,
           breakdown: [
             { name: "FREIGHT", amount: 14.85, percentage: 69.7 },
             { name: "BUNKER", amount: 4.15, percentage: 19.5 },
@@ -116,7 +117,7 @@ export const cargoService = {
       return res.data;
     } catch (err) {
       console.warn('Backend unavailable, returning approval confirmation', err);
-      return {
+      const fallbackResponse: ApproveDecisionResponse = {
         status: "APPROVED",
         fixture_id: "VYG-2025-085",
         sign_off_id: "FIX-AUTH-88219-EXP",
@@ -153,6 +154,22 @@ export const cargoService = {
           transit_estimate: "EST. 14.8 DAYS TRANSIT"
         }
       };
+      const existing = JSON.parse(window.localStorage.getItem('mythos.approvedVoyages') || '[]');
+      const voyage = {
+        voyage_id: fallbackResponse.fixture_id,
+        cargo: payload.cargo_type.split('(')[0].trim(),
+        route: payload.route,
+        vessel: payload.vessel,
+        quantity: payload.quantity_mt,
+        cost_per_mt: payload.cost_per_mt,
+        status: 'UPCOMING',
+        date_str: payload.laycan_window,
+      };
+      window.localStorage.setItem('mythos.approvedVoyages', JSON.stringify([
+        voyage,
+        ...existing.filter((item: { voyage_id: string }) => item.voyage_id !== voyage.voyage_id),
+      ]));
+      return fallbackResponse;
     }
   },
 

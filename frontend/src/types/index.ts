@@ -78,6 +78,7 @@ export interface EffectiveCostData {
   waiting: number;
   misc: number;
   total_cost_per_mt: number;
+  total_transport_cost: number;
   breakdown: CostComponent[];
 }
 

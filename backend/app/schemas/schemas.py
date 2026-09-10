@@ -66,6 +66,7 @@ class EffectiveCostData(BaseModel):
     waiting: float
     misc: float
     total_cost_per_mt: float
+    total_transport_cost: float
     breakdown: List[CostComponent]
 
 # Risk Schema

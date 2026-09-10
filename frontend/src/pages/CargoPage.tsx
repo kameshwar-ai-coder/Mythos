@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   FileText, 
   Download,
-  AlertCircle
+  AlertCircle,
+  ArrowLeftRight
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -184,6 +185,14 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
 
   const minTolerance = Math.round(form.quantity_mt * 0.9);
   const maxTolerance = Math.round(form.quantity_mt * 1.1);
+  const trendChartData = analysis?.freight_market.trend_history.map((point, index, points) => {
+    const firstForecastIndex = points.findIndex((item) => item.is_forecast);
+    return {
+      ...point,
+      historicalRate: point.is_forecast ? null : point.rate,
+      forecastRate: point.is_forecast || index === firstForecastIndex - 1 ? point.rate : null,
+    };
+  }) ?? [];
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
@@ -569,6 +578,18 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
             </select>
           </div>
 
+          <div className="md:col-span-2 flex justify-center -my-2">
+            <button
+              type="button"
+              title="Swap origin and destination"
+              aria-label="Swap origin and destination"
+              onClick={() => setForm({ ...form, starting_port: form.destination_port, destination_port: form.starting_port })}
+              className="p-2 rounded-full border border-[#DFE6EE] bg-white text-[#22272E] hover:bg-[#FAFBFD] shadow-sm"
+            >
+              <ArrowLeftRight size={16} />
+            </button>
+          </div>
+
           {/* 3. Quantity (MT) */}
           <div className="md:col-span-2 space-y-1.5">
             <div className="flex justify-between font-mono text-xs font-bold text-[#6C7A89]">
@@ -752,18 +773,19 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
               <div className="flex justify-between font-mono text-[10px] text-[#6C7A89] font-bold uppercase mb-2">
                 <span>FREIGHT RATE TREND & 30-DAY OUTLOOK ($/MT)</span>
                 <div className="flex items-center gap-4">
-                  <span>— HISTORICAL</span>
-                  <span>--- FORECAST</span>
+                  <span>— CURRENT RATE</span>
+                  <span>- - - FORECAST RATE</span>
                 </div>
               </div>
               <div className="h-[140px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={analysis.freight_market.trend_history} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                  <LineChart data={trendChartData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke="#DFE6EE" vertical={false} />
                     <XAxis dataKey="month" tick={{ fill: '#6C7A89', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={{ stroke: '#DFE6EE' }} />
                     <YAxis domain={[10, 18]} tick={{ fill: '#6C7A89', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={{ stroke: '#DFE6EE' }} tickFormatter={(v) => `$${v.toFixed(2)}`} />
-                    <Tooltip formatter={(val: any) => [`$${Number(val).toFixed(2)} / MT`, 'Rate']} />
-                    <Line type="monotone" dataKey="rate" stroke="#22272E" strokeWidth={2} dot={{ r: 3, fill: '#22272E' }} />
+                    <Tooltip formatter={(val: any, name: any) => [`$${Number(val).toFixed(2)} / MT`, name === 'forecastRate' ? 'Forecast rate' : 'Current rate']} />
+                    <Line type="monotone" dataKey="historicalRate" name="Current rate" stroke="#22272E" strokeWidth={2} dot={{ r: 3, fill: '#22272E' }} />
+                    <Line type="monotone" dataKey="forecastRate" name="Forecast rate" stroke="#6C7A89" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: '#6C7A89' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -851,7 +873,7 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
             <div className="flex justify-between items-center font-mono text-xs font-bold uppercase tracking-wider">
               <span className="text-[#22272E]">4. Effective Cost</span>
               <span className="text-[#22272E]">
-                TOTAL COST / MT: ${analysis.effective_cost.total_cost_per_mt.toFixed(2)} / MT
+                TOTAL TRANSPORT COST: ${analysis.effective_cost.total_transport_cost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
 
@@ -890,6 +912,10 @@ export const CargoPage: React.FC<CargoPageProps> = ({ onNavigate }) => {
               <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-3 rounded">
                 <div className="text-[10px] text-[#6C7A89] uppercase font-bold">TOTAL COST / MT</div>
                 <div className="font-bold text-base text-[#22272E] mt-1">${analysis.effective_cost.total_cost_per_mt.toFixed(2)} <span className="text-xs font-normal text-[#6C7A89]">/ MT</span></div>
+              </div>
+              <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-3 rounded col-span-2 md:col-span-1">
+                <div className="text-[10px] text-[#6C7A89] uppercase font-bold">TOTAL TRANSPORT COST</div>
+                <div className="font-bold text-base text-[#22272E] mt-1">${analysis.effective_cost.total_transport_cost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
               </div>
             </div>
           </div>

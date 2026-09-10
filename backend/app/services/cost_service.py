@@ -19,6 +19,7 @@ class CostService:
         misc_per_mt = round(freight_rate * 0.06, 2)
 
         total_cost = round(freight_rate + bunker_per_mt + waiting_cost_per_mt + misc_per_mt, 2)
+        total_transport_cost = round(total_cost * quantity_mt, 2)
 
         freight_pct = round((freight_rate / total_cost) * 100, 1)
         bunker_pct = round((bunker_per_mt / total_cost) * 100, 1)
@@ -31,6 +32,7 @@ class CostService:
             "waiting": waiting_cost_per_mt,
             "misc": misc_per_mt,
             "total_cost_per_mt": total_cost,
+            "total_transport_cost": total_transport_cost,
             "waiting_days": waiting_days,
             "breakdown": [
                 {"name": "FREIGHT", "amount": freight_rate, "percentage": freight_pct},

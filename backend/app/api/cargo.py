@@ -137,6 +137,7 @@ def analyze_cargo(payload: CargoAnalyzeRequest, db: Session = Depends(get_db)):
             "waiting": effective_cost["waiting"],
             "misc": effective_cost["misc"],
             "total_cost_per_mt": effective_cost["total_cost_per_mt"],
+            "total_transport_cost": effective_cost["total_transport_cost"],
             "breakdown": effective_cost["breakdown"]
         },
         "risk_analysis": risk_analysis,

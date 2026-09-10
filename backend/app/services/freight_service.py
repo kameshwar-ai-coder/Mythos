@@ -21,15 +21,15 @@ class FreightService:
         avg_change = sum(r.change_dod for r in rates[:5]) / min(len(rates), 5) if rates else 0.15
 
         if avg_change > 0.05:
-            direction = "BULLISH"
+            direction = "rise"
             direction_symbol = "▲"
             forecast_rate = round(latest_spot * 1.09, 2)
         elif avg_change < -0.05:
-            direction = "BEARISH"
+            direction = "down"
             direction_symbol = "▼"
             forecast_rate = round(latest_spot * 0.94, 2)
         else:
-            direction = "STABLE"
+            direction = "normal"
             direction_symbol = "—"
             forecast_rate = latest_spot
 
@@ -53,8 +53,8 @@ class FreightService:
         }
 
     @staticmethod
-    def calculate_forecast(current_rate: float, direction: str = "BULLISH"):
-        multiplier = 1.0 if direction == "BULLISH" else (-1.0 if direction == "BEARISH" else 0.2)
+    def calculate_forecast(current_rate: float, direction: str = "rise"):
+        multiplier = 1.0 if direction == "rise" else (-1.0 if direction == "down" else 0.2)
         h7_change = round(0.25 * multiplier, 2)
         h14_change = round(0.80 * multiplier, 2)
         h30_change = round(1.35 * multiplier, 2)
