@@ -1,0 +1,1143 @@
+You are the lead full-stack developer for this project.
+
+PROJECT:
+SAIL FREIGHT INTELLIGENCE
+
+GOAL:
+Build a complete, working, responsive web application for:
+
+“Intelligent Freight Forecasting & Vessel Chartering Decision-Support System for Bulk Cargo to the East Coast of India.”
+
+I already created these folders:
+
+/frontend
+/backend
+
+Build the application inside these folders.
+
+IMPORTANT:
+I have provided UI reference screenshots.
+
+THE SCREENSHOTS ARE THE PRIMARY VISUAL REFERENCE.
+
+Recreate the same visual language, layout, spacing, typography, colors, cards, tables, charts, sidebar, headers and information density.
+
+Do NOT create a generic AI dashboard.
+Do NOT redesign the interface.
+Do NOT add unnecessary sections.
+Do NOT add unnecessary text.
+
+==================================================
+TECH STACK — FIXED
+==================================================
+
+FRONTEND:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Recharts
+- Lucide React
+- Axios
+
+BACKEND:
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Pandas
+- NumPy
+- scikit-learn
+
+DATABASE:
+- PostgreSQL
+
+ARCHITECTURE:
+
+React
+   ↓
+Axios REST API
+   ↓
+FastAPI
+   ↓
+Business Logic / Decision Engine
+   ↓
+PostgreSQL
+
+
+==================================================
+PROJECT STRUCTURE
+==================================================
+
+Create:
+
+/frontend
+    /src
+        /components
+        /pages
+        /layouts
+        /services
+        /hooks
+        /utils
+        /types
+        /data
+        App.tsx
+        main.tsx
+
+/backend
+    /app
+        /api
+        /models
+        /schemas
+        /services
+        /decision
+        /ml
+        /database
+        main.py
+
+Keep frontend and backend completely separated.
+
+==================================================
+UI DESIGN SYSTEM
+==================================================
+
+Use ONLY:
+
+#FAFBFD
+#DFE6EE
+#B9C3CF
+#6C7A89
+#22272E
+
+Visual appearance:
+
+- White / gray / charcoal
+- Professional maritime terminal
+- Enterprise software
+- Sharp
+- Clean
+- Dense but readable
+- Minimal
+- Data-focused
+
+DO NOT USE:
+
+- Green
+- Bright blue
+- Purple
+- Pink
+- Orange
+- Neon
+- Gradients
+- Glassmorphism
+- Glowing effects
+- AI sparkle graphics
+- Decorative illustrations
+- Excessive rounded cards
+- Excessive shadows
+
+Border radius:
+8–12px maximum.
+
+Borders:
+1px thin borders.
+
+Use strong alignment and consistent spacing.
+
+==================================================
+GLOBAL LAYOUT
+==================================================
+
+Desktop:
+
+┌──────────────┬──────────────────────────────┐
+│              │ Header                       │
+│   Sidebar    ├──────────────────────────────┤
+│              │                              │
+│              │ Main Content                  │
+│              │                              │
+└──────────────┴──────────────────────────────┘
+
+Sidebar is fixed.
+
+Sidebar navigation MUST contain ONLY:
+
+Dashboard
+Cargo
+Market
+History
+Settings
+
+Do NOT add:
+
+Vessels
+Ports
+Strategy
+Scenarios
+Decisions
+Outcomes
+
+These functions belong inside Cargo Analysis.
+
+Sidebar:
+- Dark charcoal
+- SAIL FREIGHT branding
+- Navigation icons
+- Active navigation state
+- Bottom operational status
+
+Header:
+- Current page
+- Small context information
+- Notification icon
+- User profile
+
+==================================================
+PAGE 1 — DASHBOARD
+==================================================
+
+Create a dashboard matching the supplied screenshot.
+
+Top KPI cards:
+
+ACTIVE CHARTERS
+UPCOMING VOYAGES
+AVERAGE FREIGHT
+AVG LANDED COST
+OPEN DECISIONS
+
+Each card should contain:
+- Label
+- Large number
+- Small supporting value
+- Status badge where appropriate
+
+Main section:
+
+MARKET TREND
+
+Show:
+- Route
+- Vessel class
+- Current freight
+- Historical line
+- Forecast line
+- Forecast range
+
+Below the chart:
+
+7D FORWARD HORIZON
+14D FORWARD HORIZON
+30D FORWARD HORIZON
+
+Use Recharts.
+
+Do not add unrelated widgets.
+
+==================================================
+PAGE 2 — CARGO
+==================================================
+
+Cargo page starts with:
+
+CARGO REQUIREMENT
+
+Inputs:
+
+1. Cargo Category
+   - Dry Bulk
+   - Liquid Bulk
+   - Bulk Gases
+
+2. Cargo Type
+
+3. Quantity (MT)
+
+4. Starting Port
+
+5. Destination Port
+
+6. Laycan Start
+
+7. Laycan End
+
+Primary button:
+
+ANALYZE CARGO
+
+Use form validation.
+
+When Analyze Cargo is clicked:
+
+DO NOT navigate to another page.
+
+Display Cargo Analysis below the input section on the SAME PAGE.
+
+==================================================
+CARGO ANALYSIS
+==================================================
+
+Cargo Analysis MUST be ONE CONTINUOUS SCROLL PAGE.
+
+ONLY include the following content.
+
+--------------------------------------------------
+CARGO SUMMARY
+--------------------------------------------------
+
+Show:
+
+Cargo Type
+Quantity
+Route
+Laycan
+
+--------------------------------------------------
+01 // FREIGHT MARKET
+--------------------------------------------------
+
+Show:
+
+Freight / MT
+Market Direction
+Forecast
+
+Freight trend chart.
+
+--------------------------------------------------
+02 // VESSEL ANALYSIS
+--------------------------------------------------
+
+Show:
+
+Recommended Vessel
+DWT
+Availability
+Suitability
+
+Compact vessel comparison table.
+
+--------------------------------------------------
+03 // PORT FEASIBILITY
+--------------------------------------------------
+
+Show:
+
+Loading Port
+Discharge Port
+Draft
+LOA
+Beam
+Compatibility
+
+Use PASS / FAIL status indicators.
+
+--------------------------------------------------
+04 // EFFECTIVE COST
+--------------------------------------------------
+
+Show:
+
+Freight
+Bunker
+Waiting
+Total Cost / MT
+
+Show compact cost breakdown visualization.
+
+--------------------------------------------------
+05 // RISK
+--------------------------------------------------
+
+Show:
+
+Market Risk
+Port Risk
+Vessel Risk
+Operational Risk
+Overall Risk
+
+--------------------------------------------------
+06 // SCENARIOS
+--------------------------------------------------
+
+Show:
+
+Bearish
+Base
+Bullish
+
+Show compact scenario comparison visualization.
+
+--------------------------------------------------
+07 // CHARTERING STRATEGY
+--------------------------------------------------
+
+Show:
+
+Spot
+Multiple Voyage
+Medium Term
+
+Clearly mark recommended option.
+
+--------------------------------------------------
+08 // FINAL DECISION
+--------------------------------------------------
+
+Large prominent decision panel.
+
+Possible decisions:
+
+BOOK NOW
+WAIT
+MONITOR
+REJECT
+
+Show:
+
+Vessel
+Cost / MT
+Risk
+Confidence
+Strategy
+
+--------------------------------------------------
+09 // WHY THIS DECISION?
+--------------------------------------------------
+
+Show ONLY:
+
+01 Market
+02 Vessel
+03 Port
+04 Cost
+05 Strategy
+
+Each can have a VERY SHORT explanation.
+
+Do not create a large paragraph.
+
+--------------------------------------------------
+10 // ACTIONS
+--------------------------------------------------
+
+Buttons:
+
+APPROVE RECOMMENDATION
+MODIFY
+SAVE
+
+==================================================
+IMPORTANT CARGO UI RULE
+==================================================
+
+Do not fill Cargo Analysis with unnecessary text.
+
+The interface should primarily communicate:
+
+LABEL
+↓
+VALUE
+↓
+STATUS
+
+Example:
+
+FREIGHT
+$14.85 / MT
+
+MARKET DIRECTION
+BULLISH ▲
+
+VESSEL
+MV Maritime Fortune
+
+SUITABILITY
+96%
+
+RISK
+2.8 / 10
+
+DECISION
+BOOK NOW
+
+Only “WHY THIS DECISION?” contains meaningful explanation.
+
+==================================================
+CARGO DECISION LOGIC
+==================================================
+
+Do NOT create a fake AI score.
+
+Use transparent prototype logic.
+
+HARD CONSTRAINTS:
+
+Vessel DWT >= Cargo Quantity
+Draft <= Port Maximum Draft
+LOA <= Port Maximum LOA
+Beam <= Port Maximum Beam
+Vessel availability fits laycan
+Cargo compatibility
+
+If any hard constraint fails:
+
+Vessel must be marked unsuitable.
+
+Effective Cost:
+
+Effective Cost =
+Freight
++ Bunker
++ Waiting
++ Other Applicable Costs
+
+Risk categories:
+
+Market Risk
+Port Risk
+Vessel Risk
+Operational Risk
+
+Decision logic should consider:
+
+- Current freight
+- Forecast direction
+- Vessel feasibility
+- Port feasibility
+- Effective cost
+- Risk
+- Charter strategy
+
+Return:
+
+BOOK NOW
+WAIT
+MONITOR
+REJECT
+
+==================================================
+MODIFY FUNCTION
+==================================================
+
+Clicking MODIFY opens a right-side drawer.
+
+Drawer contains:
+
+Cargo Category
+Cargo Type
+Quantity
+Starting Port
+Destination
+Laycan Start
+Laycan End
+
+Buttons:
+
+CANCEL
+RE-ANALYZE
+
+After Re-Analyze:
+
+- Update freight
+- Update vessel recommendation
+- Update feasibility
+- Update cost
+- Update risk
+- Update scenarios
+- Update strategy
+- Update final decision
+
+==================================================
+APPROVE FUNCTION
+==================================================
+
+When user clicks:
+
+APPROVE RECOMMENDATION
+
+Change state to:
+
+APPROVED
+
+Remain on Cargo page.
+
+Add the approved voyage to:
+
+History → Upcoming
+
+==================================================
+PAGE 3 — MARKET
+==================================================
+
+Recreate the supplied Market screenshot.
+
+Only include:
+
+01 // CURRENT MARKET
+
+Show:
+
+Freight Rate
+Market Direction
+Volatility
+
+02 // CHART // FREIGHT TREND & FORECAST
+
+Show:
+
+Historical Spot
+Forecast Curve
+
+Forecast cards:
+
+7 Day Forecast
+14 Day Forecast
+30 Day Forecast
+
+03 // MARKET HISTORY // HISTORICAL FREIGHT TABLE
+
+Columns:
+
+Date
+Route
+Vessel Type
+Cargo
+Qty (MT)
+Rate / MT
+Change
+Status
+
+Use compact enterprise table styling.
+
+==================================================
+PAGE 4 — HISTORY
+==================================================
+
+Recreate the supplied History screenshot.
+
+Tabs:
+
+Upcoming
+Active
+Completed
+
+Summary sections:
+
+Upcoming Voyages
+Active Voyages
+Completed Fixtures
+
+Below:
+
+VOYAGE LEDGER
+
+Columns:
+
+Voyage
+Cargo
+Route
+Vessel
+Quantity
+Cost / MT
+Status
+Date
+
+Include:
+
+Pagination
+Status badges
+Compact table
+
+Approved cargo recommendations must appear under Upcoming.
+
+==================================================
+PAGE 5 — SETTINGS
+==================================================
+
+Recreate the supplied Settings screenshot.
+
+01 // USER PROFILE
+
+Fields:
+
+User Full Name
+Operational Role / Title
+Dispatch Email Route
+Reporting Currency
+
+02 // NOTIFICATIONS & DISPATCHES
+
+Toggles:
+
+Spot Rate Alerts
+Port Congestion & Berthing Delays
+Vessel Availability Match Score
+Fixture Approvals & Confirmations
+Daily Intelligence Digest
+SMS / Direct Urgent Dispatch
+
+03 // SYSTEM SETTINGS
+
+Fields:
+
+Default Starting Screen
+Display Density
+Table Pagination Count
+
+Buttons:
+
+Reset Defaults
+Save Changes
+
+==================================================
+DATABASE
+==================================================
+
+Use PostgreSQL.
+
+Create tables:
+
+cargo_requirements
+vessels
+ports
+berths
+freight_rates
+port_congestion
+commodity_prices
+vessel_positions
+voyages
+voyage_outcomes
+recommendations
+settings
+
+Use SQLAlchemy models.
+
+Use proper relationships.
+
+==================================================
+BACKEND API
+==================================================
+
+Create these endpoints:
+
+POST /api/cargo/analyze
+
+GET /api/market/current
+
+GET /api/market/history
+
+GET /api/market/forecast
+
+GET /api/vessels
+
+POST /api/vessels/analyze
+
+POST /api/ports/feasibility
+
+POST /api/decision/recommend
+
+POST /api/decision/approve
+
+GET /api/history
+
+GET /api/history/upcoming
+
+GET /api/history/active
+
+GET /api/history/completed
+
+GET /api/settings
+
+PUT /api/settings
+
+==================================================
+BACKEND SERVICES
+==================================================
+
+Create separate services:
+
+freight_service.py
+vessel_service.py
+port_service.py
+cost_service.py
+risk_service.py
+scenario_service.py
+strategy_service.py
+decision_service.py
+
+Do not put all business logic inside main.py.
+
+==================================================
+ML / FORECASTING
+==================================================
+
+For the prototype:
+
+Use historical freight data.
+
+Implement:
+
+- Moving average baseline
+- Simple trend calculation
+- scikit-learn model where useful
+
+Forecast horizons:
+
+7 days
+14 days
+30 days
+
+Return:
+
+forecast value
+direction
+confidence
+range
+
+Do not claim real-world accuracy without actual validation.
+
+==================================================
+SAMPLE DATA
+==================================================
+
+Create realistic prototype data for:
+
+Ports:
+
+Paradip
+Visakhapatnam
+Gangavaram
+Gopalpur
+Dhamra
+Haldia
+Sagar / Sandheads
+
+Origins can include:
+
+Hay Point
+Gladstone
+Newcastle
+Port Hedland
+Australia
+United States
+Mozambique
+Indonesia
+Russia
+
+Vessel classes:
+
+Handysize
+Supramax
+Panamax
+Capesize
+
+Create enough sample records for:
+
+- freight history
+- vessels
+- port constraints
+- congestion
+- voyages
+- historical outcomes
+
+Use local seed data.
+
+The application must work without external APIs.
+
+==================================================
+DATA FLOW
+==================================================
+
+Cargo Input
+
+↓
+
+Cargo Analysis API
+
+↓
+
+Freight Forecast
+
++
+
+Vessel Filtering
+
++
+
+Port Feasibility
+
+↓
+
+Effective Cost
+
+↓
+
+Risk Analysis
+
+↓
+
+Scenario Analysis
+
+↓
+
+Chartering Strategy
+
+↓
+
+Final Decision
+
+↓
+
+Human Approval
+
+↓
+
+History
+
+==================================================
+RESPONSIVE DESIGN
+==================================================
+
+DESKTOP:
+
+Fixed sidebar
+Full dashboard
+Multi-column cards
+Full tables
+Full charts
+
+TABLET:
+
+Compact sidebar
+Responsive grids
+Cards resize
+Tables remain usable
+
+MOBILE:
+
+Collapsible sidebar
+Single-column sections
+Horizontal scrolling for tables
+Scrollable charts
+Stack cards vertically
+Buttons remain accessible
+No horizontal page overflow
+
+Do not create a different visual design for mobile.
+
+It must feel like the same application.
+
+==================================================
+COMPONENTS
+==================================================
+
+Create reusable components:
+
+Sidebar
+Header
+KpiCard
+SectionHeader
+MetricCard
+StatusBadge
+InputField
+SelectField
+DateField
+DataTable
+ChartCard
+RiskIndicator
+ScenarioCard
+StrategyCard
+DecisionPanel
+Drawer
+Modal
+Tabs
+Button
+
+==================================================
+ERROR / LOADING STATES
+==================================================
+
+Implement:
+
+Loading states
+API error states
+Empty states
+Form validation
+Disabled button states
+
+Keep them visually consistent.
+
+==================================================
+NO UNNECESSARY FEATURES
+==================================================
+
+DO NOT ADD:
+
+Chatbot
+AI assistant
+Map
+Live AIS tracking
+Broker marketplace
+Payment system
+User registration
+Social features
+Messaging
+Complex notifications
+Weather dashboard
+Unrelated analytics
+Extra navigation pages
+
+Unless explicitly required later.
+
+==================================================
+NO FAKE COMPLEXITY
+==================================================
+
+Do not add technologies just to make the project look advanced.
+
+Do not use:
+
+Docker
+Kubernetes
+Kafka
+Redis
+Microservices
+GraphQL
+
+for this prototype.
+
+Keep the architecture simple:
+
+React
+↓
+FastAPI
+↓
+PostgreSQL
+
+==================================================
+CODE QUALITY
+==================================================
+
+Use:
+
+- TypeScript
+- Clean component structure
+- Reusable components
+- Proper API service layer
+- Typed API responses
+- Environment variables
+- Proper database session handling
+- Pydantic schemas
+- SQLAlchemy models
+- Error handling
+- Clean separation between UI and business logic
+
+Do not create huge files.
+
+Do not duplicate code.
+
+==================================================
+VISUAL REFERENCE RULE
+==================================================
+
+The supplied screenshots are the source of truth for the UI.
+
+Before considering the frontend complete, check:
+
+Sidebar
+Header
+Page width
+Card dimensions
+Spacing
+Typography
+Borders
+Buttons
+Tables
+Charts
+Status badges
+Navigation
+Alignment
+Responsive behavior
+
+The final result should look like a professional:
+
+SAIL FREIGHT INTELLIGENCE TERMINAL
+
+not a generic AI-generated website.
+
+==================================================
+FINAL REQUIREMENT
+==================================================
+
+Build the COMPLETE working application.
+
+Do not only create static screens.
+
+The following must actually work:
+
+Dashboard navigation
+Cargo form
+Cargo analysis
+Freight forecast
+Vessel recommendation
+Port feasibility
+Cost calculation
+Risk calculation
+Scenario comparison
+Strategy recommendation
+Final decision
+Modify
+Re-Analyze
+Approve
+History update
+Market page
+History page
+Settings
+Responsive layout
+
+The application should be runnable locally with:
+
+Frontend:
+npm install
+npm run dev
+
+Backend:
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+Make sure the frontend communicates with the FastAPI backend.
+
+Make sure PostgreSQL integration is implemented.
+
+Seed the database with prototype data.
+
+Do not leave major functionality as TODO or placeholder.
+
+Build the project step-by-step, but finish with a fully connected working application.
+
+
+project/
+│
+├── frontend/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── layouts/
+│       ├── services/
+│       ├── hooks/
+│       ├── types/
+│       └── utils/
+│
+├── backend/
+│   └── app/
+│       ├── api/
+│       ├── models/
+│       ├── schemas/
+│       ├── services/
+│       ├── ml/
+│       ├── decision/
+│       └── database/
+│
+└── README.md
