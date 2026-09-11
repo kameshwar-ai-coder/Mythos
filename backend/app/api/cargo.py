@@ -55,12 +55,13 @@ def analyze_cargo(payload: CargoAnalyzeRequest, db: Session = Depends(get_db)):
         "trend_history": freight_info["trend_history"]
     }
 
-    # 3. Vessel Analysis from Database
+    # 3. Vessel Analysis from 50,000 Dataset & ML Model
     vessel_data = VesselService.analyze_vessels(
         db,
         quantity_mt=payload.quantity_mt,
         category=payload.cargo_category,
         cargo_type=payload.cargo_type,
+        starting_port_str=payload.starting_port,
         destination_port_str=payload.destination_port
     )
 
@@ -70,7 +71,9 @@ def analyze_cargo(payload: CargoAnalyzeRequest, db: Session = Depends(get_db)):
         load_port_str=payload.starting_port,
         discharge_port_str=payload.destination_port,
         vessel_dict=vessel_data["top_vessel_obj"],
-        quantity_mt=payload.quantity_mt
+        quantity_mt=payload.quantity_mt,
+        cargo_category=payload.cargo_category,
+        cargo_type=payload.cargo_type
     )
 
     # 5. Effective Landed Cost Calculation

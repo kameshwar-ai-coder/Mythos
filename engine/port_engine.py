@@ -86,6 +86,10 @@ def load_india_ports(file_path):
         "cargo_category"
     ].apply(normalize_category)
 
+    df["port_clean"] = df["port"].astype(str).str.strip().str.lower()
+    df["cargo_category_clean"] = df["cargo_category"].astype(str).str.strip().str.lower()
+    df["cargo_type_clean"] = df["cargo_type"].astype(str).str.strip().str.lower()
+
     return df
 
 
@@ -135,6 +139,10 @@ def load_international_ports(file_path):
         "cargo_category"
     ].apply(normalize_category)
 
+    df["port_clean"] = df["port"].astype(str).str.strip().str.lower()
+    df["cargo_category_clean"] = df["cargo_category"].astype(str).str.strip().str.lower()
+    df["cargo_type_clean"] = df["cargo_type"].astype(str).str.strip().str.lower()
+
     return df
 
 
@@ -156,21 +164,11 @@ def find_port(
     # Search India
     # --------------------------------------------------------
 
-    india_matches = india_df[
-        india_df["port"].apply(
-            clean_text
-        ) == search
-    ].copy()
+    india_clean = india_df["port_clean"] if "port_clean" in india_df.columns else india_df["port"].astype(str).str.strip().str.lower()
+    intl_clean = international_df["port_clean"] if "port_clean" in international_df.columns else international_df["port"].astype(str).str.strip().str.lower()
 
-    # --------------------------------------------------------
-    # Search International
-    # --------------------------------------------------------
-
-    international_matches = international_df[
-        international_df["port"].apply(
-            clean_text
-        ) == search
-    ].copy()
+    india_matches = india_df[india_clean == search].copy()
+    international_matches = international_df[intl_clean == search].copy()
 
     # --------------------------------------------------------
     # Exact matches
@@ -196,23 +194,8 @@ def find_port(
     # Partial search
     # --------------------------------------------------------
 
-    india_partial = india_df[
-        india_df["port"].apply(
-            clean_text
-        ).str.contains(
-            search,
-            na=False
-        )
-    ].copy()
-
-    international_partial = international_df[
-        international_df["port"].apply(
-            clean_text
-        ).str.contains(
-            search,
-            na=False
-        )
-    ].copy()
+    india_partial = india_df[india_clean.str.contains(search, na=False, regex=False)].copy()
+    international_partial = international_df[intl_clean.str.contains(search, na=False, regex=False)].copy()
 
     if not india_partial.empty:
 
@@ -247,33 +230,14 @@ def prepare_port_rows(
     cargo_type
 ):
 
-    category = normalize_category(
-        cargo_category
-    )
+    category_clean = clean_text(cargo_category)
+    cargo_type_clean = clean_text(cargo_type)
 
-    cargo_type_clean = clean_text(
-        cargo_type
-    )
+    cat_col = port_rows["cargo_category_clean"] if "cargo_category_clean" in port_rows.columns else port_rows["cargo_category"].apply(normalize_category).astype(str).str.strip().str.lower()
+    type_col = port_rows["cargo_type_clean"] if "cargo_type_clean" in port_rows.columns else port_rows["cargo_type"].astype(str).str.strip().str.lower()
 
-    # --------------------------------------------------------
-    # Category match
-    # --------------------------------------------------------
-
-    category_matches = port_rows[
-        port_rows["cargo_category"].apply(
-            normalize_category
-        ) == category
-    ].copy()
-
-    # --------------------------------------------------------
-    # Exact cargo type
-    # --------------------------------------------------------
-
-    type_matches = category_matches[
-        category_matches["cargo_type"].apply(
-            clean_text
-        ) == cargo_type_clean
-    ].copy()
+    category_matches = port_rows[cat_col == category_clean].copy()
+    type_matches = category_matches[category_matches["cargo_type_clean" if "cargo_type_clean" in category_matches.columns else "cargo_type"].astype(str).str.strip().str.lower() == cargo_type_clean].copy()
 
     # --------------------------------------------------------
     # Priority

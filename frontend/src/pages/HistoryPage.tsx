@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { historyService } from '../services/historyService';
 import { HistorySummaryData } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 
 export const HistoryPage: React.FC = () => {
+  const { formatRate } = useCurrency();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'active' | 'completed'>('upcoming');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'UPCOMING' | 'ACTIVE' | 'COMPLETED'>('ALL');
   const [summaryData, setSummaryData] = useState<HistorySummaryData | null>(null);
@@ -102,7 +104,7 @@ export const HistoryPage: React.FC = () => {
                 680,000 <span className="text-xs font-normal text-[#6C7A89]">MT SCHEDULED</span>
               </div>
               <div className="font-mono text-xs text-[#6C7A89] mt-0.5">
-                AVG COST: $14.92 / MT • 4 STEMS
+                AVG COST: {formatRate(summaryData?.upcoming_avg_cost || 14.92)} / MT • 4 STEMS
               </div>
             </div>
           </div>
@@ -216,7 +218,7 @@ export const HistoryPage: React.FC = () => {
 
             <div>
               <div className="font-mono text-3xl font-bold text-[#22272E]">
-                $14.42 <span className="text-xs font-normal text-[#6C7A89]">AVG COST / MT</span>
+                {formatRate(summaryData?.completed_avg_cost || 14.42)} <span className="text-xs font-normal text-[#6C7A89]">AVG COST / MT</span>
               </div>
               <div className="font-mono text-xs text-[#6C7A89] mt-0.5">
                 TOTAL VOL: 5,420,000 MT • 100% DISCHARGED
@@ -315,7 +317,7 @@ export const HistoryPage: React.FC = () => {
                   <td className="py-3 px-4 text-[#6C7A89]">{row.route}</td>
                   <td className="py-3 px-4 font-semibold text-[#22272E]">{row.vessel}</td>
                   <td className="py-3 px-4 text-[#6C7A89]">{row.quantity.toLocaleString()} MT</td>
-                  <td className="py-3 px-4 font-bold text-[#22272E]">${row.cost_per_mt.toFixed(2)}</td>
+                  <td className="py-3 px-4 font-bold text-[#22272E]">{formatRate(row.cost_per_mt)}</td>
                   <td className="py-3 px-4">
                     {row.status === 'UPCOMING' && (
                       <span className="bg-[#FAFBFD] border border-[#DFE6EE] text-[#22272E] px-2 py-0.5 rounded text-[10px] font-bold">UPCOMING</span>

@@ -6,6 +6,7 @@ import { MarketPage } from './pages/MarketPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { NavigationPage } from './types';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 export const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<NavigationPage>('dashboard');
@@ -28,9 +29,11 @@ export const App: React.FC = () => {
   };
 
   return (
-    <MainLayout currentPage={currentPage} onNavigate={setCurrentPage}>
-      {renderCurrentPage()}
-    </MainLayout>
+    <CurrencyProvider>
+      <MainLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+        {renderCurrentPage()}
+      </MainLayout>
+    </CurrencyProvider>
   );
 };
 

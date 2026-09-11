@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bell, User, Clock } from 'lucide-react';
 import { NavigationPage } from '../../types';
+import { useCurrency } from '../../context/CurrencyContext';
 
 interface HeaderProps {
   currentPage: NavigationPage;
@@ -9,6 +10,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentPage, titleOverride, subTitleOverride }) => {
+  const { currency, symbol } = useCurrency();
   const getHeaderInfo = () => {
     if (titleOverride) {
       return {
@@ -75,6 +77,10 @@ export const Header: React.FC<HeaderProps> = ({ currentPage, titleOverride, subT
 
         {/* User Profile Pill */}
         <div className="flex items-center gap-2.5 pl-3 border-l border-[#DFE6EE]">
+          <div className="hidden sm:flex items-center gap-1.5 bg-[#FAFBFD] border border-[#DFE6EE] px-2.5 py-1 rounded font-mono text-[11px] font-bold text-[#22272E]">
+            <span className="text-[#6C7A89]">CURRENCY:</span>
+            <span className="text-emerald-700 bg-emerald-50 px-1 rounded">{currency} ({symbol})</span>
+          </div>
           <div className="text-right">
             <div className="font-medium text-xs text-[#22272E] leading-tight">
               Capt. J. Vance

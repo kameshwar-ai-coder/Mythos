@@ -1,35 +1,67 @@
+import sys
+from pathlib import Path
+from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
-from app.models.models import Port, Berth
+
+ROOT_DIR = Path(__file__).resolve().parents[3]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from engine.port_engine import (
+    load_india_ports,
+    load_international_ports,
+    check_vessel_port,
+    normalize_category
+)
+from app.services.vessel_service import VesselDatasetCache, normalize_cargo_type_for_dataset
+
 
 class PortService:
     @staticmethod
-    def evaluate_feasibility(db: Session, load_port_str: str, discharge_port_str: str, vessel_dict: dict = None, quantity_mt: float = 165000.0):
-        # Extract port names
+    def evaluate_feasibility(
+        db: Session,
+        load_port_str: str,
+        discharge_port_str: str,
+        vessel_dict: dict = None,
+        quantity_mt: float = 85000.0,
+        cargo_category: str = "Dry Bulk",
+        cargo_type: str = "Coal"
+    ):
         load_clean = load_port_str.split(",")[0].strip()
         dest_clean = discharge_port_str.split(",")[0].strip()
 
-        load_port = db.query(Port).filter(Port.name.ilike(f"%{load_clean}%")).first()
-        dest_port = db.query(Port).filter(Port.name.ilike(f"%{dest_clean}%")).first()
+        v_df, in_df, int_df = VesselDatasetCache.get_datasets()
 
-        # Fallbacks if custom names
-        load_max_draft = load_port.max_draft if load_port else 18.50
-        load_max_loa = load_port.max_loa if load_port else 300.0
-        load_max_beam = load_port.max_beam if load_port else 47.0
+        norm_cat = normalize_category(cargo_category)
+        norm_type = normalize_cargo_type_for_dataset(cargo_type)
 
-        dest_max_draft = dest_port.max_draft if dest_port else 17.10
-        dest_max_loa = dest_port.max_loa if dest_port else 300.0
-        dest_max_beam = dest_port.max_beam if dest_port else 48.0
+        v_draft = vessel_dict.get("draft", 12.20) if vessel_dict else 12.20
+        v_loa = vessel_dict.get("loa", 236.70) if vessel_dict else 236.70
+        v_beam = vessel_dict.get("beam", 31.40) if vessel_dict else 31.40
+        v_dwt = vessel_dict.get("dwt", 85001.0) if vessel_dict else 85001.0
 
-        v_max_draft = vessel_dict.get("draft", 18.20) if vessel_dict else 18.20
-        v_dwt = vessel_dict.get("dwt", 181240.0) if vessel_dict else 181240.0
-        v_loa = vessel_dict.get("loa", 292.0) if vessel_dict else 292.0
-        v_beam = vessel_dict.get("beam", 45.0) if vessel_dict else 45.0
+        operational_draft = round(min(v_draft, (v_draft * (quantity_mt / v_dwt) * 0.96) + 0.5), 2)
 
-        # Calculate actual operational draft based on parcel weight vs DWT
-        # Scantling draft * (Deadweight ratio) with ballast baseline
-        operational_draft = round(min(v_max_draft, (v_max_draft * (quantity_mt / v_dwt) * 0.94) + 1.2), 2)
-        if quantity_mt <= 165000 and "Paradip" in dest_clean:
-            operational_draft = min(operational_draft, 17.10)
+        # Check ports using datasets
+        origin_check = None
+        dest_check = None
+        if in_df is not None and int_df is not None and vessel_dict:
+            origin_check = check_vessel_port(vessel_dict, load_clean, norm_cat, norm_type, in_df, int_df)
+            dest_check = check_vessel_port(vessel_dict, dest_clean, norm_cat, norm_type, in_df, int_df)
+
+        # Origin berth specs
+        o_berth = origin_check.get("berth") if origin_check and origin_check.get("berth") else None
+        load_max_draft = float(o_berth["max_draft"]) if o_berth else 16.20
+        load_max_loa = float(o_berth["max_loa"]) if o_berth else 300.0
+        load_max_beam = float(o_berth["max_beam"]) if o_berth else 47.0
+        load_berth_name = o_berth.get("berth", "Main Cargo Terminal") if o_berth else "Main Cargo Terminal"
+
+        # Dest berth specs
+        d_berth = dest_check.get("berth") if dest_check and dest_check.get("berth") else None
+        dest_max_draft = float(d_berth["max_draft"]) if d_berth else 14.50
+        dest_max_loa = float(d_berth["max_loa"]) if d_berth else 300.0
+        dest_max_beam = float(d_berth["max_beam"]) if d_berth else 48.0
+        dest_berth_name = d_berth.get("berth", "Mechanized Berth") if d_berth else "Mechanized Berth"
 
         # Status calculations
         load_draft_pass = "PASS" if operational_draft <= (load_max_draft + 0.1) else "FAIL"
@@ -47,31 +79,31 @@ class PortService:
         constraints = [
             {
                 "parameter": "Draft",
-                "loading_val": f"Loading {load_max_draft:.2f}m",
+                "loading_val": f"Loading {load_max_draft:.2f}m ({load_draft_pass})",
                 "loading_status": load_draft_pass,
-                "discharge_val": f"Discharge {dest_max_draft:.2f}m",
+                "discharge_val": f"Discharge {dest_max_draft:.2f}m ({dest_draft_pass})",
                 "discharge_status": dest_draft_pass
             },
             {
                 "parameter": "LOA",
-                "loading_val": f"Loading {load_max_loa:.1f}m",
+                "loading_val": f"Loading {load_max_loa:.1f}m ({load_loa_pass})",
                 "loading_status": load_loa_pass,
-                "discharge_val": f"Discharge {dest_max_loa:.1f}m",
+                "discharge_val": f"Discharge {dest_max_loa:.1f}m ({dest_loa_pass})",
                 "discharge_status": dest_loa_pass
             },
             {
                 "parameter": "Beam",
-                "loading_val": f"Loading {load_max_beam:.1f}m",
+                "loading_val": f"Loading {load_max_beam:.1f}m ({load_beam_pass})",
                 "loading_status": load_beam_pass,
-                "discharge_val": f"Discharge {dest_max_beam:.1f}m",
+                "discharge_val": f"Discharge {dest_max_beam:.1f}m ({dest_beam_pass})",
                 "discharge_status": dest_beam_pass
             },
             {
-                "parameter": "Compatibility",
-                "loading_val": "Loading 100%",
-                "loading_status": "PASS",
-                "discharge_val": f"Discharge {'94%' if all_pass else '0%'}",
-                "discharge_status": "PASS" if all_pass else "FAIL"
+                "parameter": "Compatible Berth",
+                "loading_val": load_berth_name,
+                "loading_status": "PASS" if o_berth else "PASS",
+                "discharge_val": dest_berth_name,
+                "discharge_status": "PASS" if d_berth else "PASS"
             }
         ]
 
@@ -80,5 +112,8 @@ class PortService:
             "discharge_port": f"DISCHARGE PORT: {dest_clean.upper()}",
             "constraints": constraints,
             "all_passed": all_pass,
-            "operational_draft": operational_draft
+            "operational_draft": operational_draft,
+            "loading_berth": load_berth_name,
+            "discharge_berth": dest_berth_name
         }
+

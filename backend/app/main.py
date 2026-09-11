@@ -4,9 +4,16 @@ from app.database.session import Base, engine
 from app.database.seed_data import init_db
 from app.api import cargo, market, vessels, ports, decision, history, settings
 
+from app.services.vessel_service import VesselDatasetCache
+from app.services.freight_service import FreightDatasetCache
+
 # Initialize database schema and seeds
 Base.metadata.create_all(bind=engine)
 init_db()
+
+# Pre-warm ML and cargo datasets for instant query response
+VesselDatasetCache.get_datasets()
+FreightDatasetCache.load()
 
 app = FastAPI(
     title="SAIL Freight Intelligence API",

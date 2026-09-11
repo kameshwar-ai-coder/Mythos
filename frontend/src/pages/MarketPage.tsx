@@ -11,8 +11,10 @@ import {
 import { Filter } from 'lucide-react';
 import { marketService } from '../services/marketService';
 import { CurrentMarketData, MarketHistoryItem } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 
 export const MarketPage: React.FC = () => {
+  const { symbol, formatRate, convert } = useCurrency();
   const [originFilter, setOriginFilter] = useState<string>('ALL');
   const [destinationFilter, setDestinationFilter] = useState<string>('ALL');
   const [cargoFilter, setCargoFilter] = useState<string>('ALL');
@@ -20,6 +22,8 @@ export const MarketPage: React.FC = () => {
   const [currentMarket, setCurrentMarket] = useState<CurrentMarketData | null>(null);
   const [forecastHorizons, setForecastHorizons] = useState<any>(null);
   const [historyTable, setHistoryTable] = useState<MarketHistoryItem[]>([]);
+
+  const [horizonFilter, setHorizonFilter] = useState<'30D' | '90D' | '1Y'>('30D');
 
   useEffect(() => {
     loadMarketData();
@@ -44,18 +48,64 @@ export const MarketPage: React.FC = () => {
     }
   };
 
-  const spot = currentMarket?.freight_rate || 14.85;
+  const spot = currentMarket?.freight_rate || 14.32;
+  const fc7 = forecastHorizons?.h7?.forecast_rate || 14.07;
+  const fc14 = forecastHorizons?.h14?.forecast_rate || 13.94;
+  const fc30 = forecastHorizons?.h30?.forecast_rate || 13.90;
+  const fc60 = forecastHorizons?.h60?.forecast_rate || 13.82;
+  const fc90 = forecastHorizons?.h90?.forecast_rate || 13.73;
+  const fc180 = forecastHorizons?.h180?.forecast_rate || 13.69;
+  const fc360 = forecastHorizons?.h360?.forecast_rate || 13.69;
 
-  const chartData = [
-    { date: '25 JAN', actual: Number((spot * 0.85).toFixed(2)), forecast: null },
-    { date: '30 JAN', actual: Number((spot * 0.88).toFixed(2)), forecast: null },
-    { date: '04 FEB', actual: Number((spot * 0.87).toFixed(2)), forecast: null },
-    { date: '09 FEB', actual: Number((spot * 0.92).toFixed(2)), forecast: null },
-    { date: '14 FEB (SPOT)', actual: spot, forecast: spot },
-    { date: '21 FEB (+7D)', actual: null, forecast: forecastHorizons?.h7?.forecast_rate || Number((spot * 1.04).toFixed(2)) },
-    { date: '28 FEB (+14D)', actual: null, forecast: forecastHorizons?.h14?.forecast_rate || Number((spot * 1.07).toFixed(2)) },
-    { date: '16 MAR (+30D)', actual: null, forecast: forecastHorizons?.h30?.forecast_rate || Number((spot * 1.11).toFixed(2)) },
-  ];
+  let chartData: any[] = [];
+  let card1: any = null;
+  let card2: any = null;
+  let card3: any = null;
+
+  if (horizonFilter === '30D') {
+    chartData = [
+      { date: 'HIST -30D', actual: convert(Number((spot + 0.15).toFixed(2))), forecast: null },
+      { date: 'HIST -14D', actual: convert(Number((spot + 0.10).toFixed(2))), forecast: null },
+      { date: 'HIST -7D', actual: convert(Number((spot + 0.05).toFixed(2))), forecast: null },
+      { date: 'TODAY (SPOT)', actual: convert(spot), forecast: convert(spot) },
+      { date: forecastHorizons?.h7?.date_str || '+7D', actual: null, forecast: convert(fc7) },
+      { date: forecastHorizons?.h14?.date_str || '+14D', actual: null, forecast: convert(fc14) },
+      { date: forecastHorizons?.h30?.date_str || '+30D', actual: null, forecast: convert(fc30) },
+    ];
+    card1 = { label: '7 Day Forecast', date: forecastHorizons?.h7?.date_str || '+7D', rate: fc7, diff: forecastHorizons?.h7?.change_usd || 0.25, pct: forecastHorizons?.h7?.change_pct || 1.8, is_pos: forecastHorizons?.h7?.is_positive, min: forecastHorizons?.h7?.range_min || fc7 - 0.25, max: forecastHorizons?.h7?.range_max || fc7 + 0.35 };
+    card2 = { label: '14 Day Forecast', date: forecastHorizons?.h14?.date_str || '+14D', rate: fc14, diff: forecastHorizons?.h14?.change_usd || 0.38, pct: forecastHorizons?.h14?.change_pct || 2.6, is_pos: forecastHorizons?.h14?.is_positive, min: forecastHorizons?.h14?.range_min || fc14 - 0.35, max: forecastHorizons?.h14?.range_max || fc14 + 0.45 };
+    card3 = { label: '30 Day Forecast', date: forecastHorizons?.h30?.date_str || '+30D', rate: fc30, diff: forecastHorizons?.h30?.change_usd || 0.42, pct: forecastHorizons?.h30?.change_pct || 2.9, is_pos: forecastHorizons?.h30?.is_positive, min: forecastHorizons?.h30?.range_min || fc30 - 0.50, max: forecastHorizons?.h30?.range_max || fc30 + 0.65 };
+  } else if (horizonFilter === '90D') {
+    chartData = [
+      { date: 'HIST -90D', actual: convert(Number((spot + 0.35).toFixed(2))), forecast: null },
+      { date: 'HIST -60D', actual: convert(Number((spot + 0.20).toFixed(2))), forecast: null },
+      { date: 'HIST -30D', actual: convert(Number((spot + 0.10).toFixed(2))), forecast: null },
+      { date: 'TODAY (SPOT)', actual: convert(spot), forecast: convert(spot) },
+      { date: forecastHorizons?.h30?.date_str || '+30D', actual: null, forecast: convert(fc30) },
+      { date: forecastHorizons?.h60?.date_str || '+60D', actual: null, forecast: convert(fc60) },
+      { date: forecastHorizons?.h90?.date_str || '+90D', actual: null, forecast: convert(fc90) },
+    ];
+    card1 = { label: '30 Day Forecast', date: forecastHorizons?.h30?.date_str || '+30D', rate: fc30, diff: forecastHorizons?.h30?.change_usd || 0.42, pct: forecastHorizons?.h30?.change_pct || 2.9, is_pos: forecastHorizons?.h30?.is_positive, min: forecastHorizons?.h30?.range_min || fc30 - 0.50, max: forecastHorizons?.h30?.range_max || fc30 + 0.65 };
+    card2 = { label: '60 Day Forecast', date: forecastHorizons?.h60?.date_str || '+60D', rate: fc60, diff: forecastHorizons?.h60?.change_usd || 0.50, pct: forecastHorizons?.h60?.change_pct || 3.5, is_pos: forecastHorizons?.h60?.is_positive, min: forecastHorizons?.h60?.range_min || fc60 - 0.65, max: forecastHorizons?.h60?.range_max || fc60 + 0.80 };
+    card3 = { label: '90 Day Forecast', date: forecastHorizons?.h90?.date_str || '+90D', rate: fc90, diff: forecastHorizons?.h90?.change_usd || 0.59, pct: forecastHorizons?.h90?.change_pct || 4.1, is_pos: forecastHorizons?.h90?.is_positive, min: forecastHorizons?.h90?.range_min || fc90 - 0.75, max: forecastHorizons?.h90?.range_max || fc90 + 0.95 };
+  } else {
+    chartData = [
+      { date: 'HIST -1Y', actual: convert(Number((spot + 0.85).toFixed(2))), forecast: null },
+      { date: 'HIST -180D', actual: convert(Number((spot + 0.55).toFixed(2))), forecast: null },
+      { date: 'HIST -90D', actual: convert(Number((spot + 0.35).toFixed(2))), forecast: null },
+      { date: 'TODAY (SPOT)', actual: convert(spot), forecast: convert(spot) },
+      { date: forecastHorizons?.h90?.date_str || '+90D', actual: null, forecast: convert(fc90) },
+      { date: forecastHorizons?.h180?.date_str || '+180D', actual: null, forecast: convert(fc180) },
+      { date: forecastHorizons?.h360?.date_str || '+360D', actual: null, forecast: convert(fc360) },
+    ];
+    card1 = { label: '90 Day Forecast', date: forecastHorizons?.h90?.date_str || '+90D', rate: fc90, diff: forecastHorizons?.h90?.change_usd || 0.59, pct: forecastHorizons?.h90?.change_pct || 4.1, is_pos: forecastHorizons?.h90?.is_positive, min: forecastHorizons?.h90?.range_min || fc90 - 0.75, max: forecastHorizons?.h90?.range_max || fc90 + 0.95 };
+    card2 = { label: '180 Day Forecast', date: forecastHorizons?.h180?.date_str || '+180D', rate: fc180, diff: forecastHorizons?.h180?.change_usd || 0.63, pct: forecastHorizons?.h180?.change_pct || 4.4, is_pos: forecastHorizons?.h180?.is_positive, min: forecastHorizons?.h180?.range_min || fc180 - 1.10, max: forecastHorizons?.h180?.range_max || fc180 + 1.30 };
+    card3 = { label: '360 Day Forecast', date: forecastHorizons?.h360?.date_str || '+360D', rate: fc360, diff: forecastHorizons?.h360?.change_usd || 0.63, pct: forecastHorizons?.h360?.change_pct || 4.4, is_pos: forecastHorizons?.h360?.is_positive, min: forecastHorizons?.h360?.range_min || fc360 - 1.40, max: forecastHorizons?.h360?.range_max || fc360 + 1.70 };
+  }
+
+  const dir = (currentMarket?.market_direction || '').toUpperCase();
+  const isMarketDown = dir === 'DOWN' || dir === 'BEARISH' || dir === 'DROP' || dir.includes('DOWN');
+  const isMarketUp = dir === 'UP' || dir === 'BULLISH' || dir === 'RISE' || dir.includes('UP');
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -136,30 +186,38 @@ export const MarketPage: React.FC = () => {
           {/* Freight Rate Card */}
           <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-4 rounded flex flex-col justify-between h-[105px]">
             <div className="font-mono text-[10px] uppercase font-bold text-[#6C7A89]">
-              Freight Rate
+              Freight Rate (Spot Benchmark)
             </div>
             <div className="flex items-baseline gap-1 my-0.5">
               <span className="font-mono text-3xl font-bold text-[#22272E]">
-                ${spot.toFixed(2)}
+                {formatRate(spot)}
               </span>
               <span className="font-mono text-xs text-[#6C7A89]">/ MT</span>
             </div>
             <div className="font-mono text-[10px] text-[#6C7A89]">
-              ▲ +${currentMarket?.change_7d_avg.toFixed(2) || '0.35'} vs 7d avg
+              {isMarketDown ? '▼' : '▲'} {formatRate(Math.abs(currentMarket?.change_7d_avg || 0.15))} vs 7d avg
             </div>
           </div>
 
           {/* Market Direction Card */}
-          <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-4 rounded flex flex-col justify-between h-[105px]">
-            <div className="font-mono text-[10px] uppercase font-bold text-[#6C7A89]">
+          <div className={`border p-4 rounded flex flex-col justify-between h-[105px] transition-colors ${
+            isMarketDown
+              ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
+              : isMarketUp
+              ? 'bg-rose-50/80 border-rose-200 text-rose-950'
+              : 'bg-[#FAFBFD] border-[#DFE6EE] text-[#22272E]'
+          }`}>
+            <div className={`font-mono text-[10px] uppercase font-bold ${
+              isMarketDown ? 'text-emerald-700' : isMarketUp ? 'text-rose-700' : 'text-[#6C7A89]'
+            }`}>
               Market Direction
             </div>
-            <div className="font-mono text-2xl font-bold text-[#22272E] flex items-center gap-1.5 my-0.5">
-              <span>{currentMarket?.market_direction || 'BULLISH'}</span>
-              <span>{currentMarket?.market_direction === 'BULLISH' ? '▲' : (currentMarket?.market_direction === 'BEARISH' ? '▼' : '—')}</span>
+            <div className="font-mono text-2xl font-bold flex items-center gap-1.5 my-0.5">
+              <span>{isMarketDown ? 'DOWN' : isMarketUp ? 'UP' : dir || 'NORMAL'}</span>
+              <span>{isMarketDown ? '▼' : isMarketUp ? '▲' : '▬'}</span>
             </div>
-            <div className="font-mono text-[10px] text-[#6C7A89]">
-              {currentMarket?.momentum || 'STRONG MOMENTUM • 88% CONF'}
+            <div className="font-mono text-[10px] opacity-80">
+              {currentMarket?.momentum ? currentMarket.momentum.replace('XGBOOST', 'ML') : 'ML FORECAST • 88% CONF'}
             </div>
           </div>
 
@@ -170,14 +228,14 @@ export const MarketPage: React.FC = () => {
             </div>
             <div className="flex items-baseline gap-2 my-0.5">
               <span className="font-mono text-2xl font-bold text-[#22272E]">
-                {currentMarket?.volatility_label || 'MODERATE'}
+                {currentMarket?.volatility_label || 'LOW'}
               </span>
               <span className="font-mono text-xs text-[#6C7A89] font-medium">
-                {currentMarket?.volatility_pct || '4.2'}%
+                {currentMarket?.volatility_pct || '1.9'}%
               </span>
             </div>
             <div className="font-mono text-[10px] text-[#6C7A89]">
-              INDEX: {currentMarket?.volatility_index || '38'} / 100 • STABLE SPREAD
+              INDEX: {currentMarket?.volatility_index || '19'} / 100 • STABLE SPREAD
             </div>
           </div>
         </div>
@@ -187,25 +245,45 @@ export const MarketPage: React.FC = () => {
       <div className="bg-white border border-[#DFE6EE] rounded-lg p-5 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="font-mono text-xs font-bold text-[#22272E] uppercase tracking-wider">
-            02 // Chart // Freight Trend & Forecast
+            02 // Chart // Freight Trend & ML 360-Day Forecast
           </div>
-          <div className="flex items-center gap-5 font-mono text-xs text-[#6C7A89]">
-            <div className="flex items-center gap-1.5">
-              <span className="w-4 h-0.5 bg-[#22272E]"></span>
-              <span>Historical Spot</span>
+
+          <div className="flex items-center gap-4">
+            {/* Time range toggle buttons */}
+            <div className="inline-flex bg-[#FAFBFD] p-1 rounded border border-[#DFE6EE]">
+              {(['30D', '90D', '1Y'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setHorizonFilter(t)}
+                  className={`font-mono text-xs font-semibold px-3 py-1 rounded transition-colors ${
+                    horizonFilter === t
+                      ? 'bg-[#22272E] text-white shadow-sm'
+                      : 'text-[#6C7A89] hover:text-[#22272E]'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-4 h-0.5 border-t-2 border-dashed border-[#22272E]"></span>
-              <span>Forecast Curve</span>
+
+            <div className="hidden sm:flex items-center gap-4 font-mono text-xs text-[#6C7A89]">
+              <div className="flex items-center gap-1.5">
+                <span className="w-4 h-0.5" style={{ backgroundColor: isMarketDown ? '#10B981' : '#EF4444' }}></span>
+                <span>Historical Benchmark</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-4 h-0.5 border-t-2 border-dashed" style={{ borderColor: isMarketDown ? '#34D399' : '#F87171' }}></span>
+                <span>ML Forecast Curve</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Recharts Curve matching 23.png */}
+        {/* Recharts Curve */}
         <div className="border border-[#DFE6EE] rounded p-4 bg-[#FAFBFD]">
           <div className="h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="2 2" stroke="#DFE6EE" vertical={false} />
                 <XAxis 
                   dataKey="date" 
@@ -218,7 +296,7 @@ export const MarketPage: React.FC = () => {
                   tick={{ fill: '#6C7A89', fontSize: 10, fontFamily: 'JetBrains Mono' }} 
                   axisLine={{ stroke: '#DFE6EE' }}
                   tickLine={false}
-                  tickFormatter={(v) => `$${Number(v).toFixed(2)}`}
+                  tickFormatter={(v) => `${symbol}${Number(v).toFixed(0)}`}
                 />
                 <Tooltip 
                   contentStyle={{
@@ -229,23 +307,23 @@ export const MarketPage: React.FC = () => {
                     fontFamily: 'JetBrains Mono',
                     fontSize: '11px'
                   }}
-                  formatter={(val: any) => [`$${Number(val).toFixed(2)} / MT`, 'Rate']}
+                  formatter={(val: any) => [`${symbol}${Number(val).toFixed(2)} / MT`, 'Rate']}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="actual" 
-                  stroke="#22272E" 
+                  stroke={isMarketDown ? '#10B981' : '#EF4444'} 
                   strokeWidth={2.5} 
-                  dot={{ r: 3, fill: '#22272E' }}
+                  dot={{ r: 3, fill: isMarketDown ? '#10B981' : '#EF4444' }}
                   connectNulls={false}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="forecast" 
-                  stroke="#22272E" 
+                  stroke={isMarketDown ? '#34D399' : '#F87171'} 
                   strokeWidth={2} 
                   strokeDasharray="4 4"
-                  dot={{ r: 3.5, fill: '#FFFFFF', stroke: '#22272E', strokeWidth: 2 }}
+                  dot={{ r: 3.5, fill: '#FFFFFF', stroke: isMarketDown ? '#10B981' : '#EF4444', strokeWidth: 2 }}
                   connectNulls={true}
                 />
               </LineChart>
@@ -253,68 +331,39 @@ export const MarketPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Forecast Horizons Cards */}
+        {/* Forecast Horizons Cards (Light Green for Down Arrow, Light Red for Up Arrow) */}
         <div>
           <div className="font-mono text-[10px] text-[#6C7A89] uppercase font-bold tracking-wider mb-2">
-            Forecast Horizons
+            Forecast Horizons (ML Model Output)
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 7 Day Forecast */}
-            <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-4 rounded space-y-2">
-              <div className="flex justify-between items-center font-mono text-[10px]">
-                <span className="font-bold text-[#22272E]">7 Day Forecast</span>
-                <span className="text-[#6C7A89]">{forecastHorizons?.h7?.date_str || '21 FEB 2025'}</span>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-bold text-[#22272E]">
-                  ${forecastHorizons?.h7?.forecast_rate.toFixed(2) || (spot + 0.55).toFixed(2)} <span className="text-xs text-[#6C7A89] font-normal">/ MT</span>
-                </span>
-                <span className="font-mono text-xs font-bold text-[#22272E]">
-                  ▲ +${forecastHorizons?.h7?.change_usd.toFixed(2) || '0.55'} (+{forecastHorizons?.h7?.change_pct.toFixed(1) || '3.7'}%)
-                </span>
-              </div>
-              <div className="font-mono text-[10px] text-[#6C7A89] border-t border-[#DFE6EE]/60 pt-1.5">
-                RANGE: ${forecastHorizons?.h7?.range_min.toFixed(2) || (spot + 0.25).toFixed(2)} – ${forecastHorizons?.h7?.range_max.toFixed(2) || (spot + 0.80).toFixed(2)}
-              </div>
-            </div>
+            {[card1, card2, card3].map((card, idx) => {
+              const isCardDown = !card.is_pos;
+              const cardBg = isCardDown
+                ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+                : 'bg-rose-50/70 border-rose-200 text-rose-950';
+              const textAccent = isCardDown ? 'text-emerald-700' : 'text-rose-700';
 
-            {/* 14 Day Forecast */}
-            <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-4 rounded space-y-2">
-              <div className="flex justify-between items-center font-mono text-[10px]">
-                <span className="font-bold text-[#22272E]">14 Day Forecast</span>
-                <span className="text-[#6C7A89]">{forecastHorizons?.h14?.date_str || '28 FEB 2025'}</span>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-bold text-[#22272E]">
-                  ${forecastHorizons?.h14?.forecast_rate.toFixed(2) || (spot + 1.00).toFixed(2)} <span className="text-xs text-[#6C7A89] font-normal">/ MT</span>
-                </span>
-                <span className="font-mono text-xs font-bold text-[#22272E]">
-                  ▲ +${forecastHorizons?.h14?.change_usd.toFixed(2) || '1.00'} (+{forecastHorizons?.h14?.change_pct.toFixed(1) || '6.7'}%)
-                </span>
-              </div>
-              <div className="font-mono text-[10px] text-[#6C7A89] border-t border-[#DFE6EE]/60 pt-1.5">
-                RANGE: ${forecastHorizons?.h14?.range_min.toFixed(2) || (spot + 0.55).toFixed(2)} – ${forecastHorizons?.h14?.range_max.toFixed(2) || (spot + 1.35).toFixed(2)}
-              </div>
-            </div>
-
-            {/* 30 Day Forecast */}
-            <div className="bg-[#FAFBFD] border border-[#DFE6EE] p-4 rounded space-y-2">
-              <div className="flex justify-between items-center font-mono text-[10px]">
-                <span className="font-bold text-[#22272E]">30 Day Forecast</span>
-                <span className="text-[#6C7A89]">{forecastHorizons?.h30?.date_str || '16 MAR 2025'}</span>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-bold text-[#22272E]">
-                  ${forecastHorizons?.h30?.forecast_rate.toFixed(2) || (spot + 1.65).toFixed(2)} <span className="text-xs text-[#6C7A89] font-normal">/ MT</span>
-                </span>
-                <span className="font-mono text-xs font-bold text-[#22272E]">
-                  ▲ +${forecastHorizons?.h30?.change_usd.toFixed(2) || '1.65'} (+{forecastHorizons?.h30?.change_pct.toFixed(1) || '11.1'}%)
-                </span>
-              </div>
-              <div className="font-mono text-[10px] text-[#6C7A89] border-t border-[#DFE6EE]/60 pt-1.5">
-                RANGE: ${forecastHorizons?.h30?.range_min.toFixed(2) || (spot + 0.95).toFixed(2)} – ${forecastHorizons?.h30?.range_max.toFixed(2) || (spot + 2.30).toFixed(2)}
-              </div>
-            </div>
+              return (
+                <div key={idx} className={`border p-4 rounded space-y-2 transition-colors ${cardBg}`}>
+                  <div className="flex justify-between items-center font-mono text-[10px]">
+                    <span className="font-bold">{card.label}</span>
+                    <span className="opacity-70">{card.date}</span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="font-mono text-2xl font-bold">
+                      {formatRate(card.rate)} <span className="text-xs font-normal opacity-70">/ MT</span>
+                    </span>
+                    <span className={`font-mono text-xs font-bold ${textAccent}`}>
+                      {card.is_pos ? '▲ +' : '▼ -'}{formatRate(card.diff)} ({card.pct}%)
+                    </span>
+                  </div>
+                  <div className="font-mono text-[10px] opacity-80 border-t border-current/20 pt-1.5">
+                    RANGE: {formatRate(card.min)} – {formatRate(card.max)}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -352,7 +401,7 @@ export const MarketPage: React.FC = () => {
                   <td className="py-2.5 px-4 text-[#6C7A89]">{row.vessel_type}</td>
                   <td className="py-2.5 px-4 text-[#6C7A89]">{row.cargo}</td>
                   <td className="py-2.5 px-4 text-[#6C7A89]">{row.quantity.toLocaleString()}</td>
-                  <td className="py-2.5 px-4 font-bold text-[#22272E]">${row.rate_per_mt.toFixed(2)}</td>
+                  <td className="py-2.5 px-4 font-bold text-[#22272E]">{formatRate(row.rate_per_mt)}</td>
                   <td className="py-2.5 px-4 font-semibold text-[#22272E]">{row.change_dod}</td>
                   <td className="py-2.5 px-4 text-right">
                     {row.status === 'SPOT' && (

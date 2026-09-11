@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { RotateCcw, Check, Shield } from 'lucide-react';
 import { settingsService } from '../services/settingsService';
 import { UserSettingsData } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 
 export const SettingsPage: React.FC = () => {
+  const { setCurrency } = useCurrency();
   const [settings, setSettings] = useState<UserSettingsData>({
     full_name: "Capt. J. Vance",
     role_title: "Chief Charterer & Head of Procurement",
@@ -30,6 +32,9 @@ export const SettingsPage: React.FC = () => {
     try {
       const res = await settingsService.getSettings();
       setSettings(res);
+      if (res?.reporting_currency) {
+        setCurrency(res.reporting_currency);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -38,6 +43,7 @@ export const SettingsPage: React.FC = () => {
   const handleSave = async () => {
     try {
       await settingsService.updateSettings(settings);
+      setCurrency(settings.reporting_currency);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err) {
@@ -62,6 +68,7 @@ export const SettingsPage: React.FC = () => {
       table_pagination_count: 10
     };
     setSettings(defaultVal);
+    setCurrency(defaultVal.reporting_currency);
   };
 
   return (

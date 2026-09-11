@@ -117,6 +117,9 @@ def load_vessel_dataset(file_path):
 
     df = df[df["max_dwt"] > 0]
 
+    df["cargo_category_clean"] = df["cargo_category"].astype(str).str.strip().str.lower()
+    df["cargo_type_clean"] = df["cargo_type"].astype(str).str.strip().str.lower()
+
     print(
         f"Vessel dataset loaded: {len(df):,} records"
     )
@@ -155,7 +158,7 @@ def recommend_vessels(
     top_n=20
 ):
 
-    category = normalize_category(
+    category_clean = clean_text(
         cargo_category
     )
 
@@ -167,19 +170,15 @@ def recommend_vessels(
     # STEP 1: Category matching
     # --------------------------------------------------------
 
-    category_matches = df[
-        df["cargo_category"] == category
-    ].copy()
+    cat_col = df["cargo_category_clean"] if "cargo_category_clean" in df.columns else df["cargo_category"].apply(normalize_category).astype(str).str.strip().str.lower()
+    category_matches = df[cat_col == category_clean].copy()
 
     # --------------------------------------------------------
     # STEP 2: Exact cargo type matching
     # --------------------------------------------------------
 
-    type_matches = category_matches[
-        category_matches["cargo_type"].apply(
-            clean_text
-        ) == cargo_type_clean
-    ].copy()
+    type_col = category_matches["cargo_type_clean"] if "cargo_type_clean" in category_matches.columns else category_matches["cargo_type"].astype(str).str.strip().str.lower()
+    type_matches = category_matches[type_col == cargo_type_clean].copy()
 
     # --------------------------------------------------------
     # Candidate selection

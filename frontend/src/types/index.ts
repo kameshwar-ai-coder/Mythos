@@ -55,6 +55,13 @@ export interface VesselAnalysisData {
     confidence: number | null;
     dataset_source?: string | null;
     dataset_row?: number | null;
+    dwt?: number | null;
+    dwt_min?: number | null;
+    dwt_max?: number | null;
+    draft?: number | null;
+    loa?: number | null;
+    beam?: number | null;
+    match_level?: string | null;
   } | null;
 }
 
